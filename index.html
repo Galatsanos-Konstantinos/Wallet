@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<!-- Προσθήκη viewport-fit=cover και απενεργοποίηση zoom για αίσθηση native app -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<!-- iOS Web App Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tαυτότητα">
+<!-- Εικονίδιο για την Οθόνη Αφετηρίας (Home Screen) -->
+<link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Gov.gr_logo.svg/512px-Gov.gr_logo.svg.png">
+
+<title>Ακαδημαϊκή Ταυτότητα</title>
+<style>
+    :root {
+        --bg-color: #000000;
+        --card-blue: #50a3f2;
+        --text-white: #ffffff;
+        --text-gray: #98989f;
+        --text-blue: #0a84ff;
+        --list-bg: #1c1c1e;
+        --border-color: #38383a;
+        --danger-red: #ff453a;
+    }
+    
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-white);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        /* Αποτροπή pull-to-refresh και overscroll effect */
+        overscroll-behavior-y: none; 
+    }
+    
+    .wallet-container {
+        width: 100%;
+        max-width: 414px;
+        min-height: 100vh;
+        background-color: var(--bg-color);
+        /* Προσαρμογή για το notch (Dynamic Island) και τη γραμμή στο κάτω μέρος των iPhone */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: calc(50px + env(safe-area-inset-bottom));
+        box-sizing: border-box;
+    }
+
+    /* Top Navigation */
+    .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        /* Προσθήκη μικρού περιθωρίου αν η εφαρμογή είναι σε standalone mode */
+        margin-top: 10px; 
+    }
+    .nav-back {
+        color: var(--text-blue);
+        font-size: 17px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        /* Αφαίρεση του highlight όταν πατιέται το link σε iOS */
+        -webkit-tap-highlight-color: transparent;
+    }
+    .nav-back::before {
+        content: '‹';
+        font-size: 26px;
+        margin-right: 5px;
+        margin-top: -2px;
+    }
+    .nav-more {
+        color: var(--text-white);
+        background: #2c2c2e;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        padding-bottom: 6px;
+        box-sizing: border-box;
+        letter-spacing: 1px;
+    }
+
+    /* Main Title */
+    .page-title {
+        font-size: 32px;
+        font-weight: 700;
+        padding: 0 15px;
+        margin: 5px 0 20px 0;
+    }
+
+    /* ID Card */
+    .id-card {
+        background-color: var(--card-blue);
+        border-radius: 12px;
+        margin: 0 15px 20px 15px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        position: relative;
+    }
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .gov-logo {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    .gov-logo svg {
+        width: 22px;
+        height: 22px;
+    }
+    .academic-title {
+        text-align: right;
+        font-size: 9px;
+        line-height: 1.2;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .card-body {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+    .name-section {
+        display: flex;
+        flex-direction: column;
+    }
+    .label-small {
+        font-size: 9px;
+        opacity: 0.8;
+        margin-bottom: 2px;
+    }
+    .name-value {
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.1;
+        max-width: 190px;
+    }
+    .photo-placeholder {
+        width: 75px;
+        height: 100px;
+        background-color: #fff;
+        border-radius: 4px;
+        background-image: url('https://via.placeholder.com/75x100.png?text=Photo');
+        background-size: cover;
+        background-position: center;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
+    .footer-col {
+        display: flex;
+        flex-direction: column;
+    }
+    .footer-val {
+        font-size: 11px;
+    }
+
+    /* QR Code Container */
+    .qr-container {
+        background: #fff;
+        border-radius: 12px;
+        margin: 0 15px 25px 15px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #000;
+    }
+    .qr-code {
+        width: 150px;
+        height: 150px;
+        background: url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=282864722701') no-repeat center;
+        background-size: contain;
+        margin-bottom: 10px;
+    }
+    .qr-text {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Action Buttons */
+    .action-button {
+        background-color: var(--list-bg);
+        color: var(--danger-red);
+        border: none;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 0 15px 25px 15px;
+        width: calc(100% - 30px);
+        font-size: 16px;
+        text-align: center;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .action-button:active {
+        opacity: 0.7;
+    }
+
+    /* Details List */
+    .details-list {
+        background-color: var(--list-bg);
+        border-radius: 10px;
+        margin: 0 15px;
+        display: flex;
+        flex-direction: column;
+    }
+    .detail-item {
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    .detail-label {
+        color: var(--text-gray);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .detail-value {
+        color: var(--text-white);
+        font-size: 16px;
+        word-wrap: break-word;
+    }
+    .value-blue {
+        color: var(--text-blue);
+    }
+    
+    /* Scrollbar hidden for app-like feel */
+    ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+    }
+</style>
+</head>
+<body>
+
+<div class="wallet-container">
+    <div class="nav">
+        <a href="#" class="nav-back">Τέλος</a>
+        <div class="nav-more">...</div>
+    </div>
+
+    <!-- Front of Card -->
+    <div class="id-card">
+        <div class="card-header">
+            <div class="gov-logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="24" height="24" rx="4" fill="white"/>
+                    <path d="M12 4V20M4 12H20" stroke="#0a84ff" stroke-width="4"/>
+                </svg>
+                gov.gr
+            </div>
+            <div class="academic-title">
+                ΑΚΑΔΗΜΑΪΚΗ ΤΑΥΤΟΤΗΤΑ<br>ACADEMIC ID
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="name-section">
+                <div class="label-small">ΟΝΟΜΑΤΕΠΩΝΥΜΟ</div>
+                <div class="name-value">ΚΩΝΣΤΑΝΤΙΝΟΣ<br>ΓΑΛΑΤΣΑΝΟΣ</div>
+            </div>
+            <div class="photo-placeholder"></div>
+        </div>
+
+        <div class="card-footer">
+            <div class="footer-col">
+                <span class="label-small">ΚΩΔΙΚΟΣ</span>
+                <span class="footer-val">282864722701</span>
+            </div>
+            <div class="footer-col">
+                <span class="label-small">ΙΔΙΟΤΗΤΑ</span>
+                <span class="footer-val">ΠΡΟΠΤΥΧΙΑΚΟΣ</span>
+            </div>
+            <div class="footer-col">
+                <span class="label-small">ΕΙΔΙΚΟ ΕΙΣΙΤΗΡΙΟ</span>
+                <span class="footer-val">Ισχύς μέχρι: 31/08/2032</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Section -->
+    <div class="qr-container">
+        <div class="qr-code"></div>
+        <div class="qr-text">ΚΩΔΙΚΟΣ ΕΓΓΡΑΦΟΥ</div>
+    </div>
+
+    <h1 class="page-title">Ακαδημαϊκή Ταυτότητα</h1>
+
+    <!-- Remove Button -->
+    <button class="action-button">Αφαίρεση πάσου</button>
+
+    <!-- Details List -->
+    <div class="details-list">
+        <div class="detail-item">
+            <div class="detail-label">ΚΩΔΙΚΟΣ ΤΑΥΤΟΤΗΤΑΣ</div>
+            <div class="detail-value value-blue">282864722701</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΟΝΟΜΑ</div>
+            <div class="detail-value">ΚΩΝΣΤΑΝΤΙΝΟΣ</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΕΠΩΝΥΜΟ</div>
+            <div class="detail-value">ΓΑΛΑΤΣΑΝΟΣ</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">NAME</div>
+            <div class="detail-value">KONSTANTINOS</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">SURNAME</div>
+            <div class="detail-value">GALATSANOS</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΑΚΑΔΗΜΑΪΚΗ ΙΔΙΟΤΗΤΑ</div>
+            <div class="detail-value">ΠΡΟΠΤΥΧΙΑΚΟΣ</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΤΜΗΜΑ/ΙΝΣΤΙΤΟΥΤΟ & ΙΔΡΥΜΑ/ΦΟ...</div>
+            <div class="detail-value">ΜΗΧΑΝΙΚΩΝ ΠΛΗΡΟΦΟΡΙΚΗΣ, ΥΠΟΛΟΓΙΣΤΩΝ ΚΑΙ ΤΗΛΕΠΙΚΟΙΝΩΝΙΩΝ (ΔΙΕΘΝΕΣ ΠΑΝΕΠΙΣΤΗΜΙΟ ΤΗΣ ΕΛΛΑΔΟΣ)</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΕΔΡΑ ΤΜΗΜΑΤΟΣ/ΙΝΣΤΙΤΟΥΤΟΥ</div>
+            <div class="detail-value">ΣΕΡΡΩΝ - ΣΕΡΡΩΝ</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΑΡΙΘΜΟΣ ΜΗΤΡΩΟΥ</div>
+            <div class="detail-value">1622-00-ict25131</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΤΟΠΟΣ ΜΟΝΙΜΗΣ ΚΑΤΟΙΚΙΑΣ</div>
+            <div class="detail-value">ΑΡΙΣΤΟΤΕΛΗ - ΧΑΛΚΙΔΙΚΗΣ</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΦΟΙΤΗΤΗΣ/-ΡΙΑ ERASMUS</div>
+            <div class="detail-value">ΟΧΙ</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">ΕΤΟΣ ΕΙΣΑΓΩΓΗΣ</div>
+            <div class="detail-value">2025</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Τύπος Εγγράφου / Document Type</div>
+            <div class="detail-value">Ακαδημαϊκή Ταυτότητα / Academic ID</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Αριθμός Ψηφιακού Εγγράφου / Digit...</div>
+            <div class="detail-value value-blue">https://dilosi.services.gov.gr/show/60fnmZQBsosi1XopwgbzCg</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
